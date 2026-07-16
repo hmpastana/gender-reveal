@@ -562,11 +562,15 @@
     }
 
     .stats-grid {
-      display: grid;
+      display: none;
       grid-template-columns: repeat(2, 1fr);
       gap: 0.8rem;
       margin: 2rem auto 0;
       width: min(100%, 34rem);
+    }
+
+    .stats-grid.visible {
+      display: grid;
     }
 
     .stat {
@@ -832,7 +836,7 @@
 
         <p class="vote-message" id="voteMessage" aria-live="polite"></p>
         <p class="legend">Blue flower = Boy &nbsp; Pink flower = Girl</p>
-        <div class="stats-grid" aria-label="Current guesses and RSVP totals">
+        <div class="stats-grid" id="statsGrid" aria-label="Current guess totals">
           <div class="stat">
             <strong id="boyVotes">0</strong>
             <span>Boy guesses</span>
@@ -840,14 +844,6 @@
           <div class="stat">
             <strong id="girlVotes">0</strong>
             <span>Girl guesses</span>
-          </div>
-          <div class="stat">
-            <strong id="yesRsvps">0</strong>
-            <span>Bee there</span>
-          </div>
-          <div class="stat">
-            <strong id="totalResponses">0</strong>
-            <span>Total replies</span>
           </div>
         </div>
       </div>
@@ -902,6 +898,7 @@
     const formMessage = document.querySelector("#formMessage");
     const rsvpForm = document.querySelector("#rsvpForm");
     const rsvpButtons = document.querySelectorAll("[data-rsvp]");
+    const statsGrid = document.querySelector("#statsGrid");
     const storedVote = localStorage.getItem("beeRevealGuess");
     let selectedGuess = storedVote || "";
 
@@ -950,8 +947,7 @@
     function updateStats(stats) {
       document.querySelector("#boyVotes").textContent = stats.boy_votes || 0;
       document.querySelector("#girlVotes").textContent = stats.girl_votes || 0;
-      document.querySelector("#yesRsvps").textContent = stats.yes_rsvps || 0;
-      document.querySelector("#totalResponses").textContent = stats.total_responses || 0;
+      statsGrid.classList.add("visible");
     }
 
     async function loadStats() {
@@ -1047,8 +1043,6 @@
       event.preventDefault();
       submitResponse(rsvpForm.dataset.rsvp || "yes");
     });
-
-    loadStats();
   </script>
 </body>
 </html>
