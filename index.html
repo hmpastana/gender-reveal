@@ -863,8 +863,8 @@
             <input id="guestName" name="name" type="text" autocomplete="name" placeholder="Your name" required>
           </label>
           <label class="field">
-            Email or phone
-            <input id="guestContact" name="contact" type="text" autocomplete="email" placeholder="Email or phone number" required>
+            Email or phone, optional
+            <input id="guestContact" name="contact" type="text" autocomplete="email" placeholder="Email or phone number">
           </label>
           <p class="form-message" id="formMessage" aria-live="polite"></p>
           <div class="rsvp-actions">
@@ -987,8 +987,8 @@
         return;
       }
 
-      if (!name || !contact) {
-        formMessage.textContent = "Please add your name and email or phone.";
+      if (!name) {
+        formMessage.textContent = "Please add your name.";
         return;
       }
 
