@@ -561,9 +561,86 @@
       font-weight: 700;
     }
 
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.8rem;
+      margin: 2rem auto 0;
+      width: min(100%, 34rem);
+    }
+
+    .stat {
+      padding: 1rem;
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.76);
+      border: 1px solid rgba(216, 156, 47, 0.18);
+      box-shadow: 0 10px 26px rgba(123, 91, 42, 0.08);
+      text-align: center;
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 1.85rem;
+      line-height: 1;
+    }
+
+    .stat span {
+      display: block;
+      margin-top: 0.35rem;
+      color: var(--muted);
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
     .rsvp {
       background: linear-gradient(180deg, #eef8ff, #fff8e8);
       text-align: center;
+    }
+
+    .rsvp-form {
+      display: grid;
+      gap: 0.9rem;
+      width: min(100%, 35rem);
+      margin: 1.8rem auto 0;
+      text-align: left;
+    }
+
+    .field {
+      display: grid;
+      gap: 0.35rem;
+      color: var(--muted);
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 0.88rem;
+      font-weight: 700;
+    }
+
+    .field input {
+      width: 100%;
+      min-height: 3.15rem;
+      padding: 0.75rem 0.9rem;
+      border: 1px solid rgba(216, 156, 47, 0.28);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.82);
+      color: var(--ink);
+      font: 1rem Arial, Helvetica, sans-serif;
+      outline: none;
+      transition: border-color 180ms ease, box-shadow 180ms ease;
+    }
+
+    .field input:focus {
+      border-color: var(--honey);
+      box-shadow: 0 0 0 4px rgba(246, 201, 95, 0.18);
+    }
+
+    .form-message {
+      min-height: 1.65rem;
+      margin: 0.2rem 0 0;
+      color: #7a5717;
+      text-align: center;
+      font-family: Arial, Helvetica, sans-serif;
+      font-weight: 700;
     }
 
     .rsvp-actions {
@@ -658,6 +735,7 @@
       }
 
       .guess-grid,
+      .stats-grid,
       .rsvp-actions {
         grid-template-columns: repeat(2, 1fr);
       }
@@ -754,6 +832,24 @@
 
         <p class="vote-message" id="voteMessage" aria-live="polite"></p>
         <p class="legend">Blue flower = Boy &nbsp; Pink flower = Girl</p>
+        <div class="stats-grid" aria-label="Current guesses and RSVP totals">
+          <div class="stat">
+            <strong id="boyVotes">0</strong>
+            <span>Boy guesses</span>
+          </div>
+          <div class="stat">
+            <strong id="girlVotes">0</strong>
+            <span>Girl guesses</span>
+          </div>
+          <div class="stat">
+            <strong id="yesRsvps">0</strong>
+            <span>Bee there</span>
+          </div>
+          <div class="stat">
+            <strong id="totalResponses">0</strong>
+            <span>Total replies</span>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -761,10 +857,21 @@
       <div class="section-inner">
         <h2 class="section-title" id="rsvp-title">Will you bee there?</h2>
         <p class="rsvp-deadline" id="rsvpDeadline">Please RSVP by August 1, 2026</p>
-        <div class="rsvp-actions">
-          <button class="rsvp-button" type="button" data-rsvp="yes">🐝 Yes, I’ll Bee There!</button>
-          <button class="rsvp-button no" type="button" data-rsvp="no">🍯 Sorry, I Can’t Make It</button>
-        </div>
+        <form class="rsvp-form" id="rsvpForm">
+          <label class="field">
+            Your name
+            <input id="guestName" name="name" type="text" autocomplete="name" placeholder="Your name" required>
+          </label>
+          <label class="field">
+            Email or phone
+            <input id="guestContact" name="contact" type="text" autocomplete="email" placeholder="Email or phone number" required>
+          </label>
+          <p class="form-message" id="formMessage" aria-live="polite"></p>
+          <div class="rsvp-actions">
+            <button class="rsvp-button" type="submit" data-rsvp="yes">🐝 Yes, I’ll Bee There!</button>
+            <button class="rsvp-button no" type="submit" data-rsvp="no">🍯 Sorry, I Can’t Make It</button>
+          </div>
+        </form>
       </div>
     </section>
   </main>
@@ -783,9 +890,11 @@
       rsvpBy: "Please RSVP by August 1, 2026"
     };
 
-    const rsvpLinks = {
-      yes: "YES_URL",
-      no: "NO_URL"
+    const supabaseConfig = {
+      url: "https://alrkfkqzomyvfbewzxuy.supabase.co",
+      anonKey: "sb_publishable_SbaKzus4V_AH426_UZd57Q_t2-Cppxi",
+      table: "gender_reveal_responses",
+      statsFunction: "get_gender_reveal_stats"
     };
 
     const openButton = document.querySelector("#openInvitation");
@@ -794,7 +903,11 @@
     const flowers = document.querySelectorAll(".flower");
     const guessCards = document.querySelectorAll(".guess-card");
     const voteMessage = document.querySelector("#voteMessage");
+    const formMessage = document.querySelector("#formMessage");
+    const rsvpForm = document.querySelector("#rsvpForm");
+    const rsvpButtons = document.querySelectorAll("[data-rsvp]");
     const storedVote = localStorage.getItem("beeRevealGuess");
+    let selectedGuess = storedVote || "";
 
     document.querySelector("#eventDate").textContent = invitationDetails.date;
     document.querySelector("#eventTime").textContent = invitationDetails.time;
@@ -816,7 +929,17 @@
       }, 650);
     }
 
+    function getSupabaseHeaders(extraHeaders = {}) {
+      return {
+        apikey: supabaseConfig.anonKey,
+        Authorization: `Bearer ${supabaseConfig.anonKey}`,
+        "Content-Type": "application/json",
+        ...extraHeaders
+      };
+    }
+
     function setSelectedGuess(choice, shouldShowMessage) {
+      selectedGuess = choice;
       guessCards.forEach((card) => {
         const isSelected = card.dataset.choice === choice;
         card.classList.toggle("selected", isSelected);
@@ -824,7 +947,83 @@
       });
 
       if (shouldShowMessage) {
+        voteMessage.textContent = "Sweet pick! Add your name and RSVP below to record it. 💛";
+      }
+    }
+
+    function updateStats(stats) {
+      document.querySelector("#boyVotes").textContent = stats.boy_votes || 0;
+      document.querySelector("#girlVotes").textContent = stats.girl_votes || 0;
+      document.querySelector("#yesRsvps").textContent = stats.yes_rsvps || 0;
+      document.querySelector("#totalResponses").textContent = stats.total_responses || 0;
+    }
+
+    async function loadStats() {
+      try {
+        const response = await fetch(`${supabaseConfig.url}/rest/v1/rpc/${supabaseConfig.statsFunction}`, {
+          method: "POST",
+          headers: getSupabaseHeaders(),
+          body: "{}"
+        });
+
+        if (!response.ok) {
+          throw new Error("Stats request failed");
+        }
+
+        const stats = await response.json();
+        updateStats(Array.isArray(stats) ? stats[0] : stats);
+      } catch (error) {
+        voteMessage.textContent = "Stats are taking a honey break. Please refresh in a moment.";
+      }
+    }
+
+    async function submitResponse(rsvp) {
+      const name = document.querySelector("#guestName").value.trim();
+      const contact = document.querySelector("#guestContact").value.trim();
+
+      if (!selectedGuess) {
+        formMessage.textContent = "Please choose Team Boy or Team Girl first.";
+        document.querySelector("#guess-title").scrollIntoView({ behavior: "smooth", block: "center" });
+        return;
+      }
+
+      if (!name || !contact) {
+        formMessage.textContent = "Please add your name and email or phone.";
+        return;
+      }
+
+      formMessage.textContent = "Saving your sweet reply...";
+      rsvpButtons.forEach((button) => {
+        button.disabled = true;
+      });
+
+      try {
+        const response = await fetch(`${supabaseConfig.url}/rest/v1/${supabaseConfig.table}`, {
+          method: "POST",
+          headers: getSupabaseHeaders({ Prefer: "return=minimal" }),
+          body: JSON.stringify({
+            name,
+            contact,
+            guess: selectedGuess,
+            rsvp
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error("Response request failed");
+        }
+
+        localStorage.setItem("beeRevealGuess", selectedGuess);
+        formMessage.textContent = "Your RSVP and guess have been recorded! 💛";
         voteMessage.textContent = "Your guess has been recorded! 💛";
+        rsvpForm.reset();
+        await loadStats();
+      } catch (error) {
+        formMessage.textContent = "Something went wrong. Please try again in a moment.";
+      } finally {
+        rsvpButtons.forEach((button) => {
+          button.disabled = false;
+        });
       }
     }
 
@@ -842,12 +1041,18 @@
       });
     });
 
-    document.querySelectorAll("[data-rsvp]").forEach((button) => {
+    rsvpButtons.forEach((button) => {
       button.addEventListener("click", () => {
-        const url = rsvpLinks[button.dataset.rsvp];
-        window.open(url, "_blank", "noopener,noreferrer");
+        rsvpForm.dataset.rsvp = button.dataset.rsvp;
       });
     });
+
+    rsvpForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      submitResponse(rsvpForm.dataset.rsvp || "yes");
+    });
+
+    loadStats();
   </script>
 </body>
 </html>
