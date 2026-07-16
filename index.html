@@ -862,10 +862,6 @@
             Your name
             <input id="guestName" name="name" type="text" autocomplete="name" placeholder="Your name" required>
           </label>
-          <label class="field">
-            Email or phone, optional
-            <input id="guestContact" name="contact" type="text" autocomplete="email" placeholder="Email or phone number">
-          </label>
           <p class="form-message" id="formMessage" aria-live="polite"></p>
           <div class="rsvp-actions">
             <button class="rsvp-button" type="submit" data-rsvp="yes">🐝 Yes, I’ll Bee There!</button>
@@ -979,7 +975,7 @@
 
     async function submitResponse(rsvp) {
       const name = document.querySelector("#guestName").value.trim();
-      const contact = document.querySelector("#guestContact").value.trim();
+      const contact = "Not provided";
 
       if (!selectedGuess) {
         formMessage.textContent = "Please choose Team Boy or Team Girl first.";
