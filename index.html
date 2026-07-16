@@ -948,6 +948,7 @@
     const formMessage = document.querySelector("#formMessage");
     const rsvpForm = document.querySelector("#rsvpForm");
     const rsvpButtons = document.querySelectorAll("[data-rsvp]");
+    const guestNameInput = document.querySelector("#guestName");
     const statsGrid = document.querySelector("#statsGrid");
     const storedVote = localStorage.getItem("beeRevealGuess");
     let selectedGuess = storedVote || "";
@@ -994,6 +995,13 @@
       }
     }
 
+    function focusGuestName() {
+      guestNameInput.scrollIntoView({ behavior: "smooth", block: "center" });
+      window.setTimeout(() => {
+        guestNameInput.focus({ preventScroll: true });
+      }, 450);
+    }
+
     function updateStats(stats) {
       document.querySelector("#boyVotes").textContent = stats.boy_votes || 0;
       document.querySelector("#girlVotes").textContent = stats.girl_votes || 0;
@@ -1020,7 +1028,7 @@
     }
 
     async function submitResponse(rsvp) {
-      const name = document.querySelector("#guestName").value.trim();
+      const name = guestNameInput.value.trim();
       const contact = "Not provided";
 
       if (!selectedGuess) {
@@ -1080,6 +1088,7 @@
       card.addEventListener("click", () => {
         const choice = card.dataset.choice;
         setSelectedGuess(choice, true);
+        focusGuestName();
       });
     });
 
