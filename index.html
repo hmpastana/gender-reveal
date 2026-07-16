@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>What Will It Bee?</title>
+  <style>
+    :root {
+      --cream: #fff8e8;
+      --honey: #f6c95f;
+      --honey-deep: #d89c2f;
+      --ink: #3c3527;
+      --muted: #746b5d;
+      --sky: #cfefff;
+      --sky-soft: #e9f8ff;
+      --blue: #9bcdf2;
+      --blue-deep: #5d9ed3;
+      --pink: #f6b7ca;
+      --pink-deep: #dd7897;
+      --leaf: #a8c98b;
+      --white: #ffffff;
+      --shadow: 0 18px 45px rgba(123, 91, 42, 0.12);
+      --radius: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--cream);
+      font-family: Georgia, "Times New Roman", serif;
+      line-height: 1.55;
+      overflow-x: hidden;
+    }
+
+    button {
+      border: 0;
+      font: inherit;
+      cursor: pointer;
+    }
+
+    .page {
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 18% 12%, rgba(255, 255, 255, 0.85), transparent 22rem),
+        linear-gradient(180deg, var(--cream), #fff3d6 48%, #fffaf0);
+    }
+
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 6rem 1.25rem 9rem;
+      overflow: hidden;
+      isolation: isolate;
+    }
+
+    .sky {
+      position: absolute;
+      inset: 0 0 24%;
+      background: linear-gradient(180deg, var(--sky), var(--sky-soft) 65%, rgba(255, 248, 232, 0));
+      z-index: -3;
+    }
+
+    .cloud {
+      position: absolute;
+      width: 7.25rem;
+      height: 2.4rem;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.88);
+      box-shadow:
+        2.1rem -0.7rem 0 0.35rem rgba(255, 255, 255, 0.9),
+        4.6rem 0.05rem 0 0.1rem rgba(255, 255, 255, 0.86),
+        1rem 0.55rem 0 -0.15rem rgba(255, 255, 255, 0.92);
+      animation: cloudDrift 28s linear infinite;
+      opacity: 0.88;
+    }
+
+    .cloud:nth-child(1) {
+      top: 14%;
+      left: -9rem;
+    }
+
+    .cloud:nth-child(2) {
+      top: 28%;
+      left: -15rem;
+      transform: scale(0.72);
+      animation-duration: 36s;
+      animation-delay: -12s;
+      opacity: 0.72;
+    }
+
+    .cloud:nth-child(3) {
+      top: 10%;
+      left: -20rem;
+      transform: scale(0.55);
+      animation-duration: 44s;
+      animation-delay: -24s;
+      opacity: 0.66;
+    }
+
+    .content {
+      max-width: 46rem;
+      text-align: center;
+      padding-top: 2rem;
+      animation: riseIn 900ms ease both;
+    }
+
+    .title {
+      margin: 0;
+      font-size: clamp(3rem, 12vw, 6.8rem);
+      line-height: 0.96;
+      letter-spacing: 0;
+      color: #4a3a23;
+      text-wrap: balance;
+    }
+
+    .subtitle {
+      max-width: 39rem;
+      margin: 1.4rem auto 0;
+      color: var(--muted);
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: clamp(1rem, 3.6vw, 1.28rem);
+    }
+
+    .open-button,
+    .rsvp-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 3.35rem;
+      padding: 0.9rem 1.35rem;
+      border-radius: var(--radius);
+      background: var(--honey);
+      color: #4a3210;
+      font-family: Arial, Helvetica, sans-serif;
+      font-weight: 700;
+      box-shadow: 0 12px 24px rgba(216, 156, 47, 0.22);
+      transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
+    }
+
+    .open-button {
+      margin-top: 2rem;
+    }
+
+    .open-button:hover,
+    .rsvp-button:hover {
+      transform: translateY(-2px);
+      background: #ffd875;
+      box-shadow: 0 16px 28px rgba(216, 156, 47, 0.24);
+    }
+
+    .bee-path {
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    .bee {
+      position: absolute;
+      left: -5rem;
+      top: 36%;
+      width: 4.7rem;
+      height: 3.4rem;
+      animation: beeFly 12s cubic-bezier(0.45, 0, 0.2, 1) infinite;
+      filter: drop-shadow(0 10px 12px rgba(89, 66, 20, 0.16));
+    }
+
+    .bee::before,
+    .bee::after {
+      content: "";
+      position: absolute;
+      top: -0.85rem;
+      width: 1.7rem;
+      height: 1.5rem;
+      border-radius: 50% 50% 45% 45%;
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid rgba(93, 158, 211, 0.18);
+      transform-origin: bottom center;
+      animation: wingFlutter 260ms ease-in-out infinite alternate;
+    }
+
+    .bee::before {
+      left: 1.15rem;
+      transform: rotate(-18deg);
+    }
+
+    .bee::after {
+      right: 0.8rem;
+      transform: rotate(18deg);
+      animation-delay: 120ms;
+    }
+
+    .bee-body {
+      position: absolute;
+      inset: 0.85rem 0.4rem 0.5rem 0.45rem;
+      border-radius: 48% 52% 48% 52%;
+      background:
+        linear-gradient(90deg, transparent 0 20%, #3d3427 20% 29%, transparent 29% 45%, #3d3427 45% 54%, transparent 54% 70%, #3d3427 70% 78%, transparent 78%),
+        var(--honey);
+      border: 2px solid rgba(65, 51, 29, 0.12);
+    }
+
+    .bee-face {
+      position: absolute;
+      right: 0.5rem;
+      top: 1.42rem;
+      width: 0.3rem;
+      height: 0.3rem;
+      border-radius: 50%;
+      background: #2f281f;
+      box-shadow: -0.7rem 0.38rem 0 -0.08rem #e88ca7;
+    }
+
+    .bee-face::after {
+      content: "";
+      position: absolute;
+      right: -0.32rem;
+      top: 0.28rem;
+      width: 0.46rem;
+      height: 0.25rem;
+      border-right: 2px solid #2f281f;
+      border-bottom: 2px solid #2f281f;
+      border-radius: 0 0 100% 0;
+    }
+
+    .bee.inviting {
+      animation: beeVisitFlowers 1.8s cubic-bezier(0.52, 0.02, 0.12, 1) forwards;
+    }
+
+    .garden {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 13rem;
+      display: flex;
+      align-items: end;
+      justify-content: center;
+      gap: clamp(0.25rem, 2vw, 1.15rem);
+      padding: 0 0.75rem 1.6rem;
+      z-index: -1;
+    }
+
+    .flower {
+      position: relative;
+      width: 2.8rem;
+      height: 8rem;
+      transform-origin: bottom center;
+      animation: sway 3.6s ease-in-out infinite;
+    }
+
+    .flower:nth-child(even) {
+      animation-delay: -1.8s;
+      height: 7.2rem;
+    }
+
+    .stem {
+      position: absolute;
+      left: 50%;
+      bottom: 0;
+      width: 0.24rem;
+      height: 5.8rem;
+      border-radius: 999px;
+      background: var(--leaf);
+      transform: translateX(-50%);
+    }
+
+    .stem::before,
+    .stem::after {
+      content: "";
+      position: absolute;
+      width: 1rem;
+      height: 0.56rem;
+      border-radius: 999px 0 999px 0;
+      background: #b8d69d;
+    }
+
+    .stem::before {
+      left: -0.82rem;
+      top: 2.7rem;
+      transform: rotate(20deg);
+    }
+
+    .stem::after {
+      right: -0.82rem;
+      top: 3.55rem;
+      transform: rotate(160deg);
+    }
+
+    .petals {
+      position: absolute;
+      left: 50%;
+      bottom: 5.35rem;
+      width: 2.75rem;
+      height: 2.75rem;
+      transform: translateX(-50%) scale(0.9);
+      transition: transform 900ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .flower.bloom .petals {
+      transform: translateX(-50%) scale(1.15);
+    }
+
+    .petals span {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 1.12rem;
+      height: 1.42rem;
+      border-radius: 999px;
+      background: var(--pink);
+      transform-origin: 50% 105%;
+      opacity: 0.95;
+    }
+
+    .flower.blue .petals span {
+      background: var(--blue);
+    }
+
+    .petals span:nth-child(1) { transform: translate(-50%, -100%) rotate(0deg); }
+    .petals span:nth-child(2) { transform: translate(-50%, -100%) rotate(72deg); }
+    .petals span:nth-child(3) { transform: translate(-50%, -100%) rotate(144deg); }
+    .petals span:nth-child(4) { transform: translate(-50%, -100%) rotate(216deg); }
+    .petals span:nth-child(5) { transform: translate(-50%, -100%) rotate(288deg); }
+
+    .center {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 0.86rem;
+      height: 0.86rem;
+      border-radius: 50%;
+      background: var(--honey);
+      transform: translate(-50%, -50%);
+      box-shadow: inset 0 -2px 0 rgba(130, 87, 23, 0.12);
+    }
+
+    .section {
+      padding: 4.5rem 1.25rem;
+    }
+
+    .section-inner {
+      width: min(100%, 58rem);
+      margin: 0 auto;
+    }
+
+    .invitation {
+      display: none;
+      background: linear-gradient(180deg, #fffaf0, #fdf1fb 52%, #eef8ff);
+    }
+
+    .invitation.visible {
+      display: block;
+      animation: fadeUp 800ms ease both;
+    }
+
+    .section-title {
+      margin: 0;
+      color: #4a3a23;
+      font-size: clamp(2.15rem, 8vw, 4rem);
+      line-height: 1;
+      text-align: center;
+      text-wrap: balance;
+    }
+
+    .details-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.9rem;
+      margin-top: 2.2rem;
+    }
+
+    .detail {
+      min-height: 7.25rem;
+      padding: 1.25rem;
+      border: 1px solid rgba(216, 156, 47, 0.2);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.72);
+      box-shadow: var(--shadow);
+    }
+
+    .detail-label {
+      margin: 0 0 0.4rem;
+      color: var(--honey-deep);
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .detail-value {
+      margin: 0;
+      font-size: clamp(1.2rem, 5vw, 1.65rem);
+      line-height: 1.25;
+      white-space: pre-line;
+    }
+
+    .guess {
+      background: #fffaf0;
+    }
+
+    .eyebrow {
+      margin: 0.8rem auto 0;
+      color: var(--muted);
+      text-align: center;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 1rem;
+    }
+
+    .guess-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .guess-card {
+      min-height: 10rem;
+      padding: 1.4rem;
+      border: 2px solid transparent;
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.82);
+      color: var(--ink);
+      box-shadow: var(--shadow);
+      transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
+    }
+
+    .guess-card:hover {
+      transform: translateY(-3px);
+    }
+
+    .guess-card.selected {
+      border-color: var(--honey);
+      background: #fff7d9;
+    }
+
+    .guess-card[data-choice="boy"].selected {
+      box-shadow: 0 18px 45px rgba(93, 158, 211, 0.22);
+    }
+
+    .guess-card[data-choice="girl"].selected {
+      box-shadow: 0 18px 45px rgba(221, 120, 151, 0.22);
+    }
+
+    .guess-name {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.55rem;
+      font-size: clamp(1.8rem, 8vw, 2.7rem);
+      line-height: 1.05;
+    }
+
+    .flower-icon {
+      position: relative;
+      display: inline-block;
+      flex: 0 0 auto;
+      width: 1.9rem;
+      height: 1.9rem;
+    }
+
+    .flower-icon::before,
+    .flower-icon::after,
+    .flower-icon span::before,
+    .flower-icon span::after,
+    .flower-icon b {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 0.78rem;
+      height: 1rem;
+      border-radius: 999px;
+      background:
+        radial-gradient(circle at 35% 28%, rgba(255, 255, 255, 0.46), transparent 34%),
+        var(--flower-color);
+      transform-origin: 50% 100%;
+      box-shadow: inset 0 -1px 0 rgba(74, 58, 35, 0.08), 0 2px 4px rgba(74, 58, 35, 0.08);
+    }
+
+    .flower-icon::before {
+      transform: translate(-50%, -98%) rotate(0deg);
+    }
+
+    .flower-icon::after {
+      transform: translate(-50%, -98%) rotate(72deg);
+    }
+
+    .flower-icon span::before {
+      transform: translate(-50%, -98%) rotate(144deg);
+    }
+
+    .flower-icon span::after {
+      transform: translate(-50%, -98%) rotate(216deg);
+    }
+
+    .flower-icon b {
+      transform: translate(-50%, -98%) rotate(288deg);
+    }
+
+    .flower-icon span {
+      position: absolute;
+      inset: 0;
+    }
+
+    .flower-icon i {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 0.54rem;
+      height: 0.54rem;
+      border-radius: 50%;
+      background: var(--honey);
+      transform: translate(-50%, -50%);
+      z-index: 1;
+      box-shadow: inset 0 -1px 0 rgba(74, 58, 35, 0.12);
+    }
+
+    .flower-icon.blue {
+      --flower-color: var(--blue);
+    }
+
+    .flower-icon.pink {
+      --flower-color: var(--pink);
+    }
+
+    .guess-note {
+      display: block;
+      margin-top: 0.75rem;
+      color: var(--muted);
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 0.95rem;
+    }
+
+    .vote-message {
+      min-height: 1.8rem;
+      margin: 1.1rem 0 0;
+      color: #7a5717;
+      text-align: center;
+      font-family: Arial, Helvetica, sans-serif;
+      font-weight: 700;
+    }
+
+    .legend {
+      margin: 1.2rem 0 0;
+      color: var(--muted);
+      text-align: center;
+      font-family: Arial, Helvetica, sans-serif;
+      font-weight: 700;
+    }
+
+    .rsvp {
+      background: linear-gradient(180deg, #eef8ff, #fff8e8);
+      text-align: center;
+    }
+
+    .rsvp-actions {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.8rem;
+      width: min(100%, 35rem);
+      margin: 2rem auto 0;
+    }
+
+    .rsvp-button.no {
+      background: #fff;
+      color: var(--ink);
+      border: 1px solid rgba(216, 156, 47, 0.26);
+      box-shadow: 0 10px 24px rgba(93, 158, 211, 0.12);
+    }
+
+    .rsvp-deadline {
+      margin: 0.9rem auto 0;
+      color: var(--muted);
+      font-family: Arial, Helvetica, sans-serif;
+      font-weight: 700;
+    }
+
+    .footer {
+      display: grid;
+      place-items: center;
+      gap: 0.5rem;
+      padding: 2.8rem 1.25rem 3.2rem;
+      background: var(--cream);
+      text-align: center;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--muted);
+    }
+
+    .tiny-bee {
+      display: inline-block;
+      font-size: 1.8rem;
+      animation: tinyFloat 2.6s ease-in-out infinite;
+    }
+
+    @keyframes cloudDrift {
+      from { translate: 0 0; }
+      to { translate: calc(100vw + 24rem) 0; }
+    }
+
+    @keyframes beeFly {
+      0% { transform: translate(-6rem, 0) rotate(-3deg); }
+      25% { transform: translate(28vw, -5.2rem) rotate(8deg); }
+      50% { transform: translate(56vw, 3rem) rotate(-5deg); }
+      75% { transform: translate(82vw, -3.7rem) rotate(6deg); }
+      100% { transform: translate(calc(100vw + 8rem), 0.8rem) rotate(-2deg); }
+    }
+
+    @keyframes beeVisitFlowers {
+      0% { left: -5rem; top: 36%; transform: translate(58vw, -1rem) rotate(3deg); }
+      70% { left: 50%; top: 58%; transform: translate(-50%, 0) rotate(-6deg); }
+      100% { left: 50%; top: calc(100% - 12rem); transform: translate(-50%, 0) rotate(0deg); }
+    }
+
+    @keyframes wingFlutter {
+      to { scale: 1 0.82; opacity: 0.58; }
+    }
+
+    @keyframes sway {
+      0%, 100% { transform: rotate(-2deg); }
+      50% { transform: rotate(2deg); }
+    }
+
+    @keyframes riseIn {
+      from { opacity: 0; transform: translateY(1.5rem); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(1rem); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes tinyFloat {
+      0%, 100% { transform: translateY(0) rotate(-8deg); }
+      50% { transform: translateY(-0.55rem) rotate(8deg); }
+    }
+
+    @media (min-width: 44rem) {
+      .hero {
+        padding-inline: 2rem;
+      }
+
+      .details-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .guess-grid,
+      .rsvp-actions {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .section {
+        padding-block: 5.5rem;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 1ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: 1ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="hero" id="hero" aria-labelledby="hero-title">
+      <div class="sky" aria-hidden="true">
+        <div class="cloud"></div>
+        <div class="cloud"></div>
+        <div class="cloud"></div>
+      </div>
+
+      <div class="bee-path" aria-hidden="true">
+        <div class="bee" id="heroBee">
+          <div class="bee-body"></div>
+          <div class="bee-face"></div>
+        </div>
+      </div>
+
+      <div class="content">
+        <h1 class="title" id="hero-title">🐝 What Will It Bee?</h1>
+        <p class="subtitle">Join us for a sweet celebration as we discover whether our little honey is a Boy or a Girl!</p>
+        <button class="open-button" id="openInvitation" type="button">🍯 Open Invitation</button>
+      </div>
+
+      <div class="garden" aria-hidden="true">
+        <div class="flower pink"><div class="stem"></div><div class="petals"><span></span><span></span><span></span><span></span><span></span><div class="center"></div></div></div>
+        <div class="flower blue"><div class="stem"></div><div class="petals"><span></span><span></span><span></span><span></span><span></span><div class="center"></div></div></div>
+        <div class="flower pink"><div class="stem"></div><div class="petals"><span></span><span></span><span></span><span></span><span></span><div class="center"></div></div></div>
+        <div class="flower blue"><div class="stem"></div><div class="petals"><span></span><span></span><span></span><span></span><span></span><div class="center"></div></div></div>
+        <div class="flower pink"><div class="stem"></div><div class="petals"><span></span><span></span><span></span><span></span><span></span><div class="center"></div></div></div>
+        <div class="flower blue"><div class="stem"></div><div class="petals"><span></span><span></span><span></span><span></span><span></span><div class="center"></div></div></div>
+      </div>
+    </section>
+
+    <section class="invitation section" id="invitation" aria-labelledby="invitation-title">
+      <div class="section-inner">
+        <h2 class="section-title" id="invitation-title">A Sweet Little Reveal</h2>
+        <div class="details-grid">
+          <article class="detail">
+            <p class="detail-label">Date</p>
+            <p class="detail-value" id="eventDate">Saturday, August 8, 2026</p>
+          </article>
+          <article class="detail">
+            <p class="detail-label">Time</p>
+            <p class="detail-value" id="eventTime">4:00 PM</p>
+          </article>
+          <article class="detail">
+            <p class="detail-label">Address</p>
+            <p class="detail-value" id="eventAddress">Lake Chaparral Park
+225 Chaparral Drive S.E.</p>
+          </article>
+          <article class="detail">
+            <p class="detail-label">Parents</p>
+            <p class="detail-value" id="parentsNames">Hellen &amp; Felipe</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="guess section" aria-labelledby="guess-title">
+      <div class="section-inner">
+        <h2 class="section-title" id="guess-title">Cast Your Guess!</h2>
+        <p class="eyebrow">Click your guess before the reveal!</p>
+
+        <div class="guess-grid" role="group" aria-label="Cast your guess">
+          <button class="guess-card" type="button" data-choice="boy" aria-pressed="false">
+            <span class="guess-name"><span class="flower-icon blue" aria-hidden="true"><span></span><b></b><i></i></span> Team Boy</span>
+            <span class="guess-note">Blue skies and baby smiles.</span>
+          </button>
+          <button class="guess-card" type="button" data-choice="girl" aria-pressed="false">
+            <span class="guess-name"><span class="flower-icon pink" aria-hidden="true"><span></span><b></b><i></i></span> Team Girl</span>
+            <span class="guess-note">Pink petals and honey wishes.</span>
+          </button>
+        </div>
+
+        <p class="vote-message" id="voteMessage" aria-live="polite"></p>
+        <p class="legend">Blue flower = Boy &nbsp; Pink flower = Girl</p>
+      </div>
+    </section>
+
+    <section class="rsvp section" aria-labelledby="rsvp-title">
+      <div class="section-inner">
+        <h2 class="section-title" id="rsvp-title">Will you bee there?</h2>
+        <p class="rsvp-deadline" id="rsvpDeadline">Please RSVP by August 1, 2026</p>
+        <div class="rsvp-actions">
+          <button class="rsvp-button" type="button" data-rsvp="yes">🐝 Yes, I’ll Bee There!</button>
+          <button class="rsvp-button no" type="button" data-rsvp="no">🍯 Sorry, I Can’t Make It</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span class="tiny-bee" aria-hidden="true">🐝</span>
+    <span>We can’t wait to celebrate with you! 💛</span>
+  </footer>
+
+  <script>
+    const invitationDetails = {
+      date: "Saturday, August 8, 2026",
+      time: "4:00 PM",
+      address: "Lake Chaparral Park\n225 Chaparral Drive S.E.",
+      parents: "Hellen & Felipe",
+      rsvpBy: "Please RSVP by August 1, 2026"
+    };
+
+    const rsvpLinks = {
+      yes: "YES_URL",
+      no: "NO_URL"
+    };
+
+    const openButton = document.querySelector("#openInvitation");
+    const invitation = document.querySelector("#invitation");
+    const heroBee = document.querySelector("#heroBee");
+    const flowers = document.querySelectorAll(".flower");
+    const guessCards = document.querySelectorAll(".guess-card");
+    const voteMessage = document.querySelector("#voteMessage");
+    const storedVote = localStorage.getItem("beeRevealGuess");
+
+    document.querySelector("#eventDate").textContent = invitationDetails.date;
+    document.querySelector("#eventTime").textContent = invitationDetails.time;
+    document.querySelector("#eventAddress").textContent = invitationDetails.address;
+    document.querySelector("#parentsNames").textContent = invitationDetails.parents;
+    document.querySelector("#rsvpDeadline").textContent = invitationDetails.rsvpBy;
+
+    function openInvitation() {
+      heroBee.classList.add("inviting");
+      flowers.forEach((flower, index) => {
+        window.setTimeout(() => flower.classList.add("bloom"), 120 * index);
+      });
+      invitation.classList.add("visible");
+      openButton.textContent = "Invitation Opened 💛";
+      openButton.disabled = true;
+
+      window.setTimeout(() => {
+        invitation.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 650);
+    }
+
+    function setSelectedGuess(choice, shouldShowMessage) {
+      guessCards.forEach((card) => {
+        const isSelected = card.dataset.choice === choice;
+        card.classList.toggle("selected", isSelected);
+        card.setAttribute("aria-pressed", String(isSelected));
+      });
+
+      if (shouldShowMessage) {
+        voteMessage.textContent = "Your guess has been recorded! 💛";
+      }
+    }
+
+    if (storedVote) {
+      setSelectedGuess(storedVote, false);
+    }
+
+    openButton.addEventListener("click", openInvitation);
+
+    guessCards.forEach((card) => {
+      card.addEventListener("click", () => {
+        const choice = card.dataset.choice;
+        localStorage.setItem("beeRevealGuess", choice);
+        setSelectedGuess(choice, true);
+      });
+    });
+
+    document.querySelectorAll("[data-rsvp]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const url = rsvpLinks[button.dataset.rsvp];
+        window.open(url, "_blank", "noopener,noreferrer");
+      });
+    });
+  </script>
+</body>
+</html>
