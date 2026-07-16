@@ -603,17 +603,21 @@
       text-align: center;
     }
 
+    .section.rsvp {
+      padding-bottom: 1rem;
+    }
+
     .rsvp-form {
       display: grid;
-      gap: 0.9rem;
+      gap: 1rem;
       width: min(100%, 35rem);
-      margin: 1.8rem auto 0;
+      margin: 2rem auto 0;
       text-align: left;
     }
 
     .field {
       display: grid;
-      gap: 0.35rem;
+      gap: 0.55rem;
       color: var(--muted);
       font-family: Arial, Helvetica, sans-serif;
       font-size: 0.88rem;
@@ -639,12 +643,18 @@
     }
 
     .form-message {
-      min-height: 1.65rem;
-      margin: 0.2rem 0 0;
+      min-height: 0;
+      margin: 0;
       color: #7a5717;
       text-align: center;
       font-family: Arial, Helvetica, sans-serif;
+      font-size: 0.95rem;
       font-weight: 700;
+      line-height: 1.45;
+    }
+
+    .form-message:empty {
+      display: none;
     }
 
     .rsvp-actions {
@@ -652,28 +662,40 @@
       grid-template-columns: 1fr;
       gap: 0.8rem;
       width: min(100%, 35rem);
-      margin: 2rem auto 0;
+      margin: 0 auto;
     }
 
     .rsvp-button.no {
       background: #fff;
       color: var(--ink);
-      border: 1px solid rgba(216, 156, 47, 0.26);
-      box-shadow: 0 10px 24px rgba(93, 158, 211, 0.12);
+      border: 1px solid rgba(74, 58, 35, 0.18);
+      box-shadow: none;
     }
 
     .rsvp-deadline {
-      margin: 0.9rem auto 0;
+      margin: 0.55rem auto 0;
       color: var(--muted);
       font-family: Arial, Helvetica, sans-serif;
       font-weight: 700;
     }
 
+    .gift-note-text {
+      width: min(100%, 39rem);
+      margin: 2rem auto 0;
+      color: #7d7468;
+      text-align: center;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 0.75rem;
+      font-style: italic;
+      line-height: 1.65;
+      opacity: 0.72;
+    }
+
     .footer {
       display: grid;
       place-items: center;
-      gap: 0.5rem;
-      padding: 2.8rem 1.25rem 3.2rem;
+      gap: 0;
+      padding: 1rem 1.25rem 2rem;
       background: var(--cream);
       text-align: center;
       font-family: Arial, Helvetica, sans-serif;
@@ -682,8 +704,13 @@
 
     .tiny-bee {
       display: inline-block;
+      margin-bottom: 0.55rem;
       font-size: 1.8rem;
       animation: tinyFloat 2.6s ease-in-out infinite;
+    }
+
+    .footer-message {
+      display: block;
     }
 
     @keyframes cloudDrift {
@@ -866,11 +893,13 @@
         </form>
       </div>
     </section>
+
   </main>
 
   <footer class="footer">
     <span class="tiny-bee" aria-hidden="true">🐝</span>
-    <span>We can’t wait to celebrate with you! 💛</span>
+    <span class="footer-message">We can’t wait to celebrate with you! 💛</span>
+    <p class="gift-note-text">Your presence is the sweetest gift! If you'd like to bring something, diapers or a small gift for our little honey would be greatly appreciated.</p>
   </footer>
 
   <script>
@@ -914,7 +943,7 @@
         window.setTimeout(() => flower.classList.add("bloom"), 120 * index);
       });
       invitation.classList.add("visible");
-      openButton.textContent = "Invitation Opened 💛";
+      openButton.textContent = "Invitation Opened 🍯";
       openButton.disabled = true;
 
       window.setTimeout(() => {
@@ -974,7 +1003,7 @@
       const contact = "Not provided";
 
       if (!selectedGuess) {
-        formMessage.textContent = "Please choose Team Boy or Team Girl first.";
+        formMessage.textContent = "Please vote for Team Boy or Team Girl before reserving your presence.";
         document.querySelector("#guess-title").scrollIntoView({ behavior: "smooth", block: "center" });
         return;
       }
@@ -1005,9 +1034,9 @@
           throw new Error("Response request failed");
         }
 
-        localStorage.setItem("beeRevealGuess", selectedGuess);
         formMessage.textContent = "Your RSVP and guess have been recorded! 💛";
         voteMessage.textContent = "Your guess has been recorded! 💛";
+        localStorage.setItem("beeRevealGuess", selectedGuess);
         rsvpForm.reset();
         await loadStats();
       } catch (error) {
@@ -1021,6 +1050,7 @@
 
     if (storedVote) {
       setSelectedGuess(storedVote, false);
+      loadStats();
     }
 
     openButton.addEventListener("click", openInvitation);
@@ -1028,7 +1058,6 @@
     guessCards.forEach((card) => {
       card.addEventListener("click", () => {
         const choice = card.dataset.choice;
-        localStorage.setItem("beeRevealGuess", choice);
         setSelectedGuess(choice, true);
       });
     });
